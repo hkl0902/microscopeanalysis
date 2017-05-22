@@ -20,7 +20,14 @@ classdef Queue < handle
         valid;
         %error_report_handle stores a function handle given from scheduler which executes when
         %queue or any object in the queue encounters an error
-        error_report_handle;    
+        error_report_handle;   
+        %Boolean flag checking whether object is paused
+        paused;
+        %Index to pick off from when unpausing
+        pause_index;
+        %active is a boolean flag indicating whether this object is
+        %currently executing or in the process of executing
+        active;
     end
     
     properties(Access = public, Constant)
@@ -33,7 +40,10 @@ classdef Queue < handle
             obj.error_report_handle = error_handle;
             obj.length = 0;
             obj.done = false;
-            if(nargin > 0)
+            obj.active = false;
+            obj.paused = false;
+            obj.pause_index = 1;
+            if(nargin > 1)
                 for i = 1:length(operation_list)
                     obj.add_to_queue(operation_list{i});
                 end
@@ -77,10 +87,18 @@ classdef Queue < handle
             obj.data_transfer_map(operation.name) = operation.outputs;
         end
         
-        function execute(obj)
+        function execute(obj, index)
             i = 1;
+            obj.active = true;
+            if(nargin > 1)
+                i = index;
+            end
             while(i <= obj.length)
                 if(~obj.list{i}.new || feval(obj.list{i}.start_check_callback))
+                    if(obj.paused)
+                        obj.pause_index = i;
+                        return;
+                    end
                     if(obj.list{i}.new)
                         obj.list{i}.new = false;
                         obj.list{i}.startup();
@@ -101,10 +119,31 @@ classdef Queue < handle
                         obj.length = length(obj.list);
                         if(obj.length == 0)
                             obj.done = true;
+                            obj.active = false;
                         end
                     end
                 end
                 i = i + 1;
+            end
+        end
+        
+        function resume_execution(obj)
+            obj.run_to_finish(obj.pause_index);
+        end
+            
+        
+        function successful = run_to_finish(obj, starting_index)
+            while(~obj.finished() && ~obj.paused)
+                if(nargin > 1)
+                    obj.execute(starting_index);
+                else
+                    obj.execute();
+                end
+            end
+            if(obj.paused)
+                successful = false;
+            else   
+                successful = true;
             end
         end
         
@@ -224,6 +263,21 @@ classdef Queue < handle
             obj.valid = false;
             msg = strcat(obj.name, ': ', error_msg);
             feval(obj.error_report_handle, msg);
+        end
+        
+        function pause(obj)
+            obj.paused = true;
+        end
+        
+        function unpause(obj)
+            obj.paused = false;
+            if(obj.active)
+                obj.resume_execution();
+            end
+        end
+        
+        function bool = is_paused(obj)
+            bool = obj.paused;
         end
     end
 end

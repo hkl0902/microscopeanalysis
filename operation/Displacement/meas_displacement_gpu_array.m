@@ -28,9 +28,9 @@ function [xoffSet, yoffSet, dispx,dispy,x, y] = meas_displacement_gpu_array(temp
     new_xmin = (xpeak - rect(3));
     new_ymin = (ypeak - rect(4));
 
-    yoffSet = new_xmin;
-    xoffSet = new_ymin;
-    
+    yoffSet = new_ymin;
+    xoffSet = new_xmin;
+    save('gpu_displacement.mat', 'yoffSet', 'xoffSet');
     %DISPLACEMENT IN PIXELS
     y = ypeak - ytemp;
     x = xpeak - xtemp;
