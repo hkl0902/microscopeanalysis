@@ -16,7 +16,7 @@ search_area_height = 2*height+rect(4); %Get total height of search area
 
 % PERFORM FOURIER TRANSFORM FOR PIXEL PRECISION COORDINATES
 
-[xpeak, ypeak] = fourier_cross_correlation(template, search_area, search_area_height, search_area_width)
+[xpeak, ypeak] = fourier_cross_correlation(template, search_area, search_area_height, search_area_width, 120);
 
 % normxcorr2 is now replaced. The new method and old differs by at most 2
 % pixels

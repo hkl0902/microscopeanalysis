@@ -19,7 +19,7 @@ function varargout = data_gui(varargin)
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
-
+ 
 % Edit the above text to modify the response to help data_gui
 
 % Begin initialization code - DO NOT EDIT
@@ -30,6 +30,7 @@ gui_State = struct('gui_Name',       mfilename, ...
                    'gui_OutputFcn',  @data_gui_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
+               
 if nargin && ischar(varargin{1})
     gui_State.gui_Callback = str2func(varargin{1});
 end
